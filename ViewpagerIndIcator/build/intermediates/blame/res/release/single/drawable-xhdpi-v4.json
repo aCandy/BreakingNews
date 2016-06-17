@@ -1,5 +1,9 @@
 [
     {
+        "merged": "E:\\BreakingNews\\ViewpagerIndIcator\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\title.9.png",
+        "source": "E:\\BreakingNews\\ViewpagerIndIcator\\src\\main\\res\\drawable-xhdpi\\title.9.png"
+    },
+    {
         "merged": "E:\\BreakingNews\\ViewpagerIndIcator\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\vpi__tab_unselected_holo.9.png",
         "source": "E:\\BreakingNews\\ViewpagerIndIcator\\src\\main\\res\\drawable-xhdpi\\vpi__tab_unselected_holo.9.png"
     },
@@ -10,6 +14,10 @@
     {
         "merged": "E:\\BreakingNews\\ViewpagerIndIcator\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\vpi__tab_selected_pressed_holo.9.png",
         "source": "E:\\BreakingNews\\ViewpagerIndIcator\\src\\main\\res\\drawable-xhdpi\\vpi__tab_selected_pressed_holo.9.png"
+    },
+    {
+        "merged": "E:\\BreakingNews\\ViewpagerIndIcator\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\news_tab_item_bg_select.9.png",
+        "source": "E:\\BreakingNews\\ViewpagerIndIcator\\src\\main\\res\\drawable-xhdpi\\news_tab_item_bg_select.9.png"
     },
     {
         "merged": "E:\\BreakingNews\\ViewpagerIndIcator\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\vpi__tab_unselected_pressed_holo.9.png",

@@ -16,7 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by 在阳光下唱歌 on 2016/6/17.
+ * ViewPager标题栏指示器实现流程：
+ * 1.本人使用的是开源框架ViewPagerIndicator(GitHub开源)
+ * 2.从GitHub上下载库并导入到Android Studio(具体流程博客上有收藏)
+ * 3.解决support-v4冲突(使版本一致即可，我在导入的时候没有发现冲突)
+ * 4.设置布局控件com.viewpagerindicator.TabPageIndicator
+ * 5.在使用该框架的Activity中增加样式(框架中的样式)
+ * 6.根据所需修改当前Activity的背景色
+ * 7.根据所需在框架样式中修改文字大小及颜色，以及指示器
  */
 public class MainActivity extends Activity {
     private View view,view1,view2;
