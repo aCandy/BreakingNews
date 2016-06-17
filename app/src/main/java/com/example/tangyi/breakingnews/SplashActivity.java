@@ -46,6 +46,8 @@ public class SplashActivity extends AppCompatActivity {
                 }
                 startActivity(intent);
                 finish();//关闭当前页面*/
+                startActivity(new Intent(SplashActivity.this,MainActivity.class));
+                finish();
             }
 
             @Override
