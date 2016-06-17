@@ -5,8 +5,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <include
-            layout="@layout/content_activity"/>
+       <include
+           android:id="@+id/content_activity"
+           layout="@layout/content_activity"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
