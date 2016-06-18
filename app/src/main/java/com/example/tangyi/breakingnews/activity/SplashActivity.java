@@ -1,22 +1,24 @@
-package com.example.tangyi.breakingnews;
+package com.example.tangyi.breakingnews.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
 
+import com.example.tangyi.breakingnews.R;
+
 /**
  * Created by 在阳光下唱歌 on 2016/6/16.
  */
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends Activity {
     private RelativeLayout splashLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_splash);
         splashLayout=(RelativeLayout)findViewById(R.id.splash_relative);
         initAnimation();
