@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,40 +51,65 @@ public class MainActivity extends Activity {
     private ViewPager viewPager;
     private TabPageIndicator mIndicator;
     private static final String[] TITLE=new String[]{"社会","娱乐","数码","互联网","电影","游戏"};
-    private LayoutInflater layoutInflater;
     private List<View> list;
-    private SwipeRefreshLayout mSRshLayout;
     private MyListView mListView;
     private ArrayList<JsonBean.ShowApi_Res_Body.PageBean.ContentList> dataList;
     private JsonBean.ShowApi_Res_Body.PageBean.ContentList data;
     private ListViewAdapter listAdapter;
+    private SwipeRefreshLayout mSwiRefresh;
+    private int page=2;
+    private String sPage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
+
         //初始化主页面ViewPager数据
         initViewPagerData();
     }
     private void initViewPagerData(){
-        layoutInflater=LayoutInflater.from(this);
-        view=(View)findViewById(R.id.content_activity);
+        LayoutInflater layoutInflater=LayoutInflater.from(this);
+        view=findViewById(R.id.content_activity);
+        viewPager=(ViewPager)view.findViewById(R.id.home_viewpager);
+
+
         view1=layoutInflater.inflate(R.layout.home_pager1,null);
         view2=layoutInflater.inflate(R.layout.home_pager2,null);
-        view3=layoutInflater.inflate(R.layout.home_pager1,null);
-        view4=layoutInflater.inflate(R.layout.home_pager1,null);
-        view5=layoutInflater.inflate(R.layout.home_pager1,null);
-        view6=layoutInflater.inflate(R.layout.home_pager1,null);
-
-
-        mSRshLayout=(SwipeRefreshLayout)view1.findViewById(R.id.swiperefresh_layout);
-        mSRshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
-                android.R.color.holo_orange_light, android.R.color.holo_red_light);
-        mSRshLayout.setSize(SwipeRefreshLayout.DEFAULT);
+        view3=layoutInflater.inflate(R.layout.home_pager3,null);
+        view4=layoutInflater.inflate(R.layout.home_pager4,null);
+        view5=layoutInflater.inflate(R.layout.home_pager5,null);
+        view6=layoutInflater.inflate(R.layout.home_pager6,null);
 
         mListView=(MyListView)view1.findViewById(R.id.home_list);
+        //上拉记载监听，定义在自定义ListView中
+        mListView.setOnRefreshListener(new MyListView.OnRefreshListener() {
+            @Override
+            public void onLoadMore() {
+                getMoreFromSociety();
+                if (data!=null){
+                    page++;
+                }else {
+                    page=2;
+                    Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
+        mSwiRefresh=(SwipeRefreshLayout)view1.findViewById(R.id.swipere_society);
+        mSwiRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getDataFromSociety();
+
+                mSwiRefresh.setRefreshing(false);
+            }
+        });
+        mSwiRefresh.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
+                android.R.color.holo_orange_light, android.R.color.holo_red_light);
+        mSwiRefresh.setSize(SwipeRefreshLayout.DEFAULT);
         list=new ArrayList<>();
         list.add(view1);
         list.add(view2);
@@ -91,7 +117,7 @@ public class MainActivity extends Activity {
         list.add(view4);
         list.add(view5);
         list.add(view6);
-        viewPager=(ViewPager)view.findViewById(R.id.home_viewpager);
+
 
         viewPager.setAdapter(new PagerAdapter() {
             @Override
@@ -101,7 +127,7 @@ public class MainActivity extends Activity {
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
-                //  container.addView(list.get(position));
+                container.addView(list.get(position));
                 return list.get(position);
             }
 
@@ -127,13 +153,14 @@ public class MainActivity extends Activity {
             Log.d("TAG","发现缓存，准备解析缓存中的Json数据");
             processData(cache,false);
         }
-        getDataFromServer();
+        getDataFromSociety();
     }
-    private void getDataFromServer(){
+    //社会频道数据请求
+    private void getDataFromSociety(){
         HttpUtils utils=new HttpUtils();
         RequestParams requestParams=new RequestParams();
         requestParams.addHeader("apikey",URList.APIKEY);
-        utils.send(HttpRequest.HttpMethod.GET, URList.URL ,requestParams,
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+URList.PAGE ,requestParams,
                 new RequestCallBack<String>() {
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
@@ -141,7 +168,7 @@ public class MainActivity extends Activity {
                         processData(result,false);
                         Log.d("TAG","请求到新的数据，准备写入缓存");
                         //调用缓存工具类的方法写入缓存
-                        CacheUtils.setCache(MainActivity.this,URList.URL,result);
+                        CacheUtils.setCache(MainActivity.this,URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+URList.PAGE ,result);
                     }
 
                     @Override
@@ -158,15 +185,15 @@ public class MainActivity extends Activity {
         if (!isMore){
             dataList=fromJson.getShowapi_res_body().getPagebean().getContentlist();
             listAdapter=new ListViewAdapter();
-            mListView.setAdapter(listAdapter);
-            if (dataList!=null){
 
+            if (dataList!=null){
+                mListView.setAdapter(listAdapter);
             }
         }else {
-           /* ArrayList<JsonBean.ShowApi_Res_Body.PageBean.ContentList.Bean> moreData=
-                    fromJson.getShowApi_res_body().getPagebean().getContentList().getBean();
+           ArrayList<JsonBean.ShowApi_Res_Body.PageBean.ContentList> moreData=
+                    fromJson.getShowapi_res_body().getPagebean().getContentlist();
             dataList.addAll(moreData);
-            listAdapter.notifyDataSetChanged();*/
+            listAdapter.notifyDataSetChanged();
        }
     }
     //填充ListView的适配器。
@@ -178,14 +205,16 @@ public class MainActivity extends Activity {
                 convertView=View.inflate(MainActivity.this,R.layout.list_item,null);
                 viewHolder=new ViewHolder();
                 viewHolder.titleText=(TextView)convertView.findViewById(R.id.title_text);
+                viewHolder.newsText=(TextView)convertView.findViewById(R.id.news_text);
                 viewHolder.timerText=(TextView)convertView.findViewById(R.id.timer_text);
                 convertView.setTag(viewHolder);
             }else {
                 viewHolder=(ViewHolder)convertView.getTag();
             }
             data = (JsonBean.ShowApi_Res_Body.PageBean.ContentList)getItem(position);
-            viewHolder.titleText.setText("        "+ data.getTitle());
-            viewHolder.timerText.setText("更新时间："+ data.getPubDate());
+            viewHolder.titleText.setText(data.getTitle());
+            viewHolder.newsText.setText(data.getSource());
+            viewHolder.timerText.setText(data.getPubDate());
             return convertView;
         }
         @Override
@@ -201,6 +230,30 @@ public class MainActivity extends Activity {
             return dataList.size();
         }
 
+    }
+    //加载更多的调用方法
+    private void getMoreFromSociety(){
+        sPage = page+"";
+        HttpUtils utils=new HttpUtils();
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+page+"",requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processData(result,true);
+                        Log.d("TAG","请求到新的数据，准备写入缓存");
+                        //调用缓存工具类的方法写入缓存
+                        CacheUtils.setCache(MainActivity.this,URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+"2",result);
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 }

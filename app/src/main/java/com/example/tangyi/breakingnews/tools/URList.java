@@ -19,7 +19,7 @@ public class URList {
     //游戏频道ID
     public static final String GEME_ID="5572a10ab3cdc86cf39001ee";
     //接口地址
-    public static final String URL="http://apis.baidu.com/showapi_open_bus/channel_news/search_news?channelId=5572a10bb3cdc86cf39001f8&page=1";
+    public static final String URL="http://apis.baidu.com/showapi_open_bus/channel_news/search_news?channelId=";
     //请求参数
     public static final String PARAMETER_URL="&page=";
 }

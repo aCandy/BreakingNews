@@ -69,18 +69,14 @@ public class JsonBean {
 
             public class ContentList{
                 private String title;
+                private String source;
+                private String link;
                 private String pubDate;
-                public void setTitle(String title) {
-                    this.title = title;
-                }
+
+
 
                 public void setPubDate(String pubDate) {
                     this.pubDate = pubDate;
-                }
-
-                public String getTitle() {
-
-                    return title;
                 }
 
                 public String getPubDate() {
@@ -88,15 +84,35 @@ public class JsonBean {
                     return pubDate;
                 }
 
-
-
-                @Override
-                public String toString() {
-                    return "Lan{" +
-                            "title='" + title + '\'' +
-                            ", pubDate='" + pubDate + '\'' +
-                            '}';
+                public void setLink(String link) {
+                    this.link = link;
                 }
+
+                public String getLink() {
+
+                    return link;
+                }
+
+                public void setTitle(String title) {
+                    this.title = title;
+                }
+
+
+
+                public String getTitle() {
+
+                    return title;
+                }
+
+                public void setSource(String source) {
+                    this.source = source;
+                }
+
+                public String getSource() {
+
+                    return source;
+                }
+
             }
         }
     }

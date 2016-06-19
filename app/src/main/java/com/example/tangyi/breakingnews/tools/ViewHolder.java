@@ -1,5 +1,6 @@
 package com.example.tangyi.breakingnews.tools;
 
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -7,5 +8,7 @@ import android.widget.TextView;
  */
 public class ViewHolder {
     public TextView titleText;
+    public TextView newsText;
     public TextView timerText;
+
 }
