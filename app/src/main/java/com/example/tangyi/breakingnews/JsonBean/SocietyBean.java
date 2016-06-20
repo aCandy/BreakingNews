@@ -1,11 +1,12 @@
-package com.example.tangyi.breakingnews.tools;
+package com.example.tangyi.breakingnews.JsonBean;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by 在阳光下唱歌 on 2016/6/17.
  */
-public class JsonBean {
+public class SocietyBean {
     private ShowApi_Res_Body showapi_res_body;
 
     public void setShowapi_res_body(ShowApi_Res_Body showapi_res_body) {
@@ -17,12 +18,6 @@ public class JsonBean {
         return showapi_res_body;
     }
 
-    @Override
-    public String toString() {
-        return "JsonBean{" +
-                "showapi_res_body=" + showapi_res_body +
-                '}';
-    }
 
 
     public class ShowApi_Res_Body{
@@ -38,22 +33,12 @@ public class JsonBean {
 
             return pagebean;
         }
-        @Override
-        public String toString() {
-            return "ShowApi_Res_Body{" +
-                    "pagebean=" + pagebean +
-                    '}';
-        }
 
 
-        public class PageBean{
+
+        public class PageBean {
             private ArrayList<ContentList> contentlist;
-            @Override
-            public String toString() {
-                return "PageBean{" +
-                        "contentlist=" + contentlist +
-                        '}';
-            }
+
 
             public void setContentlist(ArrayList<ContentList> contentlist) {
                 this.contentlist = contentlist;
@@ -65,31 +50,29 @@ public class JsonBean {
             }
 
 
-
-
-            public class ContentList{
+            public class ContentList {
                 private String title;
                 private String source;
                 private String link;
                 private String pubDate;
-
-
 
                 public void setPubDate(String pubDate) {
                     this.pubDate = pubDate;
                 }
 
                 public String getPubDate() {
-
                     return pubDate;
                 }
+
+
+
+
 
                 public void setLink(String link) {
                     this.link = link;
                 }
 
                 public String getLink() {
-
                     return link;
                 }
 
@@ -97,10 +80,7 @@ public class JsonBean {
                     this.title = title;
                 }
 
-
-
                 public String getTitle() {
-
                     return title;
                 }
 
@@ -109,10 +89,8 @@ public class JsonBean {
                 }
 
                 public String getSource() {
-
                     return source;
                 }
-
             }
         }
     }

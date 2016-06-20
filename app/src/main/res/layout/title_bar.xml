@@ -3,6 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="35dp"
     android:background="@drawable/bar">
+    <ImageButton
+        android:id="@+id/bar_img"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_setting"
+        android:background="@null"
+        android:padding="3dp"
+        android:layout_marginLeft="10dp"
+        android:scaleType="fitCenter"/>
     <TextView
         android:id="@+id/bar_text"
         android:layout_width="wrap_content"
