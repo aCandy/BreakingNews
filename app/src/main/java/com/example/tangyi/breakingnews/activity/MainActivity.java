@@ -17,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,7 +53,7 @@ import java.util.List;
  * 6.根据所需修改当前Activity的背景色
  * 7.根据所需在框架样式中修改文字大小及颜色，以及指示器
  */
-public class MainActivity extends Activity implements MyListView.OnRefreshListener,SwipeRefreshLayout.OnRefreshListener,AdapterView.OnItemClickListener,ViewPager.OnPageChangeListener{
+public class MainActivity extends Activity implements MyListView.OnRefreshListener,SwipeRefreshLayout.OnRefreshListener,AdapterView.OnItemClickListener,ViewPager.OnPageChangeListener,View.OnClickListener{
     private View view,view1,view2,view3,view4,view5,view6,barView,settingView;
     private DrawerLayout mDrawerLayout;
     private LinearLayout leftLayout,aboutLayout;
@@ -91,13 +90,13 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
     //各个频道ListView适配器
     private SocietyListViewAdapter societyListViewAdapter;
     private RecreationListViewAdapter recreationListViewAdapter;
-   /* private DigitalListViewAdapter digitalListViewAdapter;
+    private DigitalListViewAdapter digitalListViewAdapter;
     private InternetListViewAdapter internetListViewAdapter;
     private MovieListViewAdapter movieListViewAdapter;
-    private GameListViewAdapter gameListViewAdapter;*/
+    private GameListViewAdapter gameListViewAdapter;
     //各个频道的SwipeRefreshLayout
     private SwipeRefreshLayout societySwiRefresh,recreationSwiRefresh,digitalSwiRefresh,internetSwiRefresh,movieSwiRefresh,gameSwiRefresh;
-    private int page=2;
+    private int societyPage =2,recreationPage=2,digitalPage=2,internetPage=2,moviePage=2,gamePage=2;
     private ImageButton openMenu;
 
     @Override
@@ -118,19 +117,9 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
         barView=view.findViewById(R.id.activity_main_bar);
         settingView=findViewById(R.id.setting_activity);
         aboutLayout=(LinearLayout)settingView.findViewById(R.id.about_layout);
-        aboutLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,AboutActivity.class));
-            }
-        });
+        aboutLayout.setOnClickListener(this);
         openMenu=(ImageButton)barView.findViewById(R.id.bar_img);
-        openMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDrawerLayout.openDrawer(leftLayout);
-            }
-        });
+        openMenu.setOnClickListener(this);
 
 
         view1=layoutInflater.inflate(R.layout.home_pager1,null);
@@ -243,7 +232,6 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
         mIndicator.setViewPager(viewPager);
         final String cache=CacheUtils.getCache(MainActivity.this,URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+URList.PAGE );
         if (!TextUtils.isEmpty(cache)){
-            Log.d("TAG","发现缓存，准备解析缓存中的Json数据");
             processDataSociety(cache,false);
         }
         //ViewPager滑动监听
@@ -262,7 +250,6 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
                     public void onSuccess(ResponseInfo<String> responseInfo) {
                         String result=responseInfo.result;
                         processDataSociety(result,false);
-                        Log.d("TAG","请求到新的数据，准备写入缓存");
                         //调用缓存工具类的方法写入缓存
                         CacheUtils.setCache(MainActivity.this,URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+URList.PAGE ,result);
                     }
@@ -279,7 +266,7 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
         HttpUtils utils=new HttpUtils();
         RequestParams requestParams=new RequestParams();
         requestParams.addHeader("apikey",URList.APIKEY);
-        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+page+"",requestParams,
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+ societyPage +"",requestParams,
                 new RequestCallBack<String>() {
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
@@ -298,7 +285,6 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
     private void processDataSociety(String json, boolean isMore){
         Gson gson=new Gson();
         SocietyBean fromJson=gson.fromJson(json,SocietyBean.class);
-        Log.d("TAG","解析数据："+fromJson);
         if (!isMore){
             societyDataList =fromJson.getShowapi_res_body().getPagebean().getContentlist();
             societyListViewAdapter =new SocietyListViewAdapter();
@@ -378,15 +364,12 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
         HttpUtils utils=new HttpUtils();
         RequestParams requestParams=new RequestParams();
         requestParams.addHeader("apikey",URList.APIKEY);
-        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.RECREATION_ID+URList.PARAMETER_URL+page+"",requestParams,
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.RECREATION_ID+URList.PARAMETER_URL+recreationPage+"",requestParams,
                 new RequestCallBack<String>() {
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
                         String result=responseInfo.result;
-                        processDataSociety(result,true);
-                        Log.d("TAG","请求到新的数据，准备读取缓存");
-                        //调用缓存工具类的方法写入缓存
-                        CacheUtils.setCache(MainActivity.this,URList.URL+URList.RECREATION_ID+URList.PARAMETER_URL+"2",result);
+                        processDataRecreation(result,true);
                     }
 
                     @Override
@@ -400,7 +383,6 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
     private void processDataRecreation(String json, boolean isMore){
         Gson gson=new Gson();
         RecreationBean fromJson=gson.fromJson(json,RecreationBean.class);
-        Log.d("TAG","娱乐解析数据："+fromJson.toString());
         if (!isMore){
             recreationDataList =fromJson.getShowapi_res_body().getPagebean().getContentlist();
             recreationListViewAdapter =new RecreationListViewAdapter();
@@ -451,30 +433,499 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
 
     }
 
+    //数码频道数据请求
+    private void getDataFromDigital(){
+        HttpUtils utils=new HttpUtils();
+        //当API接口需要Header请求信息的时候，就可以利用Xutils框架新建RequestParams对象，调用addHeader()方法添加请求头
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.DIGITAL_ID+URList.PARAMETER_URL+URList.PAGE ,requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataDigital(result,false);
+                        //调用缓存工具类的方法写入缓存
+                        CacheUtils.setCache(MainActivity.this, URList.URL+URList.DIGITAL_ID+URList.PARAMETER_URL+URList.PAGE,result);
 
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //数码频道加载更多的调用方法
+    private void getMoreFromDigital(){
+        HttpUtils utils=new HttpUtils();
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.DIGITAL_ID+URList.PARAMETER_URL+digitalPage+"",requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataDigital(result,true);
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //数码频道数据解析
+    private void processDataDigital(String json, boolean isMore){
+        Gson gson=new Gson();
+        DigitalBean fromJson=gson.fromJson(json,DigitalBean.class);
+        if (!isMore){
+            digitalDataList =fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            digitalListViewAdapter =new DigitalListViewAdapter();
+
+            if (digitalDataList !=null){
+                digitalListView.setAdapter(digitalListViewAdapter);
+            }
+        }else {
+            ArrayList<DigitalBean.ShowApi_Res_Body.PageBean.ContentList> moreData=
+                    fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            digitalDataList.addAll(moreData);
+            digitalListViewAdapter.notifyDataSetChanged();
+        }
+    }
+    //数码频道ListView适配器
+    public class DigitalListViewAdapter extends BaseAdapter {
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView==null){
+                convertView=View.inflate(MainActivity.this,R.layout.list_item,null);
+                viewHolder=new ViewHolder();
+                viewHolder.titleText=(TextView)convertView.findViewById(R.id.title_text);
+                viewHolder.newsText=(TextView)convertView.findViewById(R.id.news_text);
+                viewHolder.timerText=(TextView)convertView.findViewById(R.id.timer_text);
+                convertView.setTag(viewHolder);
+            }else {
+                viewHolder=(ViewHolder)convertView.getTag();
+            }
+            digitalData = (DigitalBean.ShowApi_Res_Body.PageBean.ContentList)getItem(position);
+            viewHolder.titleText.setText(digitalData.getTitle());
+            viewHolder.newsText.setText(digitalData.getSource());
+            viewHolder.timerText.setText(digitalData.getPubDate());
+            return convertView;
+        }
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+        @Override
+        public Object getItem(int position) {
+            return digitalDataList.get(position);
+        }
+        @Override
+        public int getCount() {
+            return digitalDataList.size();
+        }
+
+    }
+
+    //互联网频道数据请求
+    private void getDataFromInternet(){
+        HttpUtils utils=new HttpUtils();
+        //当API接口需要Header请求信息的时候，就可以利用Xutils框架新建RequestParams对象，调用addHeader()方法添加请求头
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.INTERNET_ID+URList.PARAMETER_URL+URList.PAGE ,requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataInternet(result,false);
+                        //调用缓存工具类的方法写入缓存
+                        CacheUtils.setCache(MainActivity.this, URList.URL+URList.INTERNET_ID+URList.PARAMETER_URL+URList.PAGE,result);
+
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //互联网频道加载更多的调用方法
+    private void getMoreFromInternet(){
+        HttpUtils utils=new HttpUtils();
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.INTERNET_ID+URList.PARAMETER_URL+internetPage+"",requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataInternet(result,true);
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //互联网频道数据解析
+    private void processDataInternet(String json, boolean isMore){
+        Gson gson=new Gson();
+        InternetBean fromJson=gson.fromJson(json,InternetBean.class);
+        if (!isMore){
+            internetDataList =fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            internetListViewAdapter =new InternetListViewAdapter();
+
+            if (internetDataList !=null){
+                internetListView.setAdapter(internetListViewAdapter);
+            }
+        }else {
+            ArrayList<InternetBean.ShowApi_Res_Body.PageBean.ContentList> moreData=
+                    fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            internetDataList.addAll(moreData);
+            internetListViewAdapter.notifyDataSetChanged();
+        }
+    }
+    //互联网频道ListView适配器
+    public class InternetListViewAdapter extends BaseAdapter {
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView==null){
+                convertView=View.inflate(MainActivity.this,R.layout.list_item,null);
+                viewHolder=new ViewHolder();
+                viewHolder.titleText=(TextView)convertView.findViewById(R.id.title_text);
+                viewHolder.newsText=(TextView)convertView.findViewById(R.id.news_text);
+                viewHolder.timerText=(TextView)convertView.findViewById(R.id.timer_text);
+                convertView.setTag(viewHolder);
+            }else {
+                viewHolder=(ViewHolder)convertView.getTag();
+            }
+            internetData = (InternetBean.ShowApi_Res_Body.PageBean.ContentList)getItem(position);
+            viewHolder.titleText.setText(internetData.getTitle());
+            viewHolder.newsText.setText(internetData.getSource());
+            viewHolder.timerText.setText(internetData.getPubDate());
+            return convertView;
+        }
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+        @Override
+        public Object getItem(int position) {
+            return internetDataList.get(position);
+        }
+        @Override
+        public int getCount() {
+            return internetDataList.size();
+        }
+
+    }
+
+    //电影频道数据请求
+    private void getDataFromMovie(){
+        HttpUtils utils=new HttpUtils();
+        //当API接口需要Header请求信息的时候，就可以利用Xutils框架新建RequestParams对象，调用addHeader()方法添加请求头
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.MOVIE_ID+URList.PARAMETER_URL+URList.PAGE ,requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataMovie(result,false);
+                        //调用缓存工具类的方法写入缓存
+                        CacheUtils.setCache(MainActivity.this, URList.URL+URList.MOVIE_ID+URList.PARAMETER_URL+URList.PAGE,result);
+
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //电影频道加载更多的调用方法
+    private void getMoreFromMovie(){
+        HttpUtils utils=new HttpUtils();
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.MOVIE_ID+URList.PARAMETER_URL+moviePage+"",requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataMovie(result,true);
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //电影频道数据解析
+    private void processDataMovie(String json, boolean isMore){
+        Gson gson=new Gson();
+        MovieBean fromJson=gson.fromJson(json,MovieBean.class);
+        if (!isMore){
+            movieDataList =fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            movieListViewAdapter =new MovieListViewAdapter();
+
+            if (movieDataList !=null){
+                movieListView.setAdapter(movieListViewAdapter);
+            }
+        }else {
+            ArrayList<MovieBean.ShowApi_Res_Body.PageBean.ContentList> moreData=
+                    fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            movieDataList.addAll(moreData);
+            movieListViewAdapter.notifyDataSetChanged();
+        }
+    }
+    //电影频道ListView适配器
+    public class MovieListViewAdapter extends BaseAdapter {
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView==null){
+                convertView=View.inflate(MainActivity.this,R.layout.list_item,null);
+                viewHolder=new ViewHolder();
+                viewHolder.titleText=(TextView)convertView.findViewById(R.id.title_text);
+                viewHolder.newsText=(TextView)convertView.findViewById(R.id.news_text);
+                viewHolder.timerText=(TextView)convertView.findViewById(R.id.timer_text);
+                convertView.setTag(viewHolder);
+            }else {
+                viewHolder=(ViewHolder)convertView.getTag();
+            }
+            movieData = (MovieBean.ShowApi_Res_Body.PageBean.ContentList)getItem(position);
+            viewHolder.titleText.setText(movieData.getTitle());
+            viewHolder.newsText.setText(movieData.getSource());
+            viewHolder.timerText.setText(movieData.getPubDate());
+            return convertView;
+        }
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+        @Override
+        public Object getItem(int position) {
+            return movieDataList.get(position);
+        }
+        @Override
+        public int getCount() {
+            return movieDataList.size();
+        }
+
+    }
+
+    //游戏频道数据请求
+    private void getDataFromGame(){
+        HttpUtils utils=new HttpUtils();
+        //当API接口需要Header请求信息的时候，就可以利用Xutils框架新建RequestParams对象，调用addHeader()方法添加请求头
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.GEME_ID+URList.PARAMETER_URL+URList.PAGE ,requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataGame(result,false);
+                        //调用缓存工具类的方法写入缓存
+                        CacheUtils.setCache(MainActivity.this, URList.URL+URList.GEME_ID+URList.PARAMETER_URL+URList.PAGE,result);
+
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //游戏频道加载更多的调用方法
+    private void getMoreFromGame(){
+        HttpUtils utils=new HttpUtils();
+        RequestParams requestParams=new RequestParams();
+        requestParams.addHeader("apikey",URList.APIKEY);
+        utils.send(HttpRequest.HttpMethod.GET, URList.URL+URList.GEME_ID+URList.PARAMETER_URL+gamePage+"",requestParams,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onSuccess(ResponseInfo<String> responseInfo) {
+                        String result=responseInfo.result;
+                        processDataGame(result,true);
+                    }
+
+                    @Override
+                    public void onFailure(HttpException e, String s) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this,s,Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //游戏频道数据解析
+    private void processDataGame(String json, boolean isMore){
+        Gson gson=new Gson();
+        GameBean fromJson=gson.fromJson(json,GameBean.class);
+        if (!isMore){
+            gameDataList =fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            gameListViewAdapter =new GameListViewAdapter();
+
+            if (gameDataList !=null){
+                gameListView.setAdapter(gameListViewAdapter);
+            }
+        }else {
+            ArrayList<GameBean.ShowApi_Res_Body.PageBean.ContentList> moreData=
+                    fromJson.getShowapi_res_body().getPagebean().getContentlist();
+            gameDataList.addAll(moreData);
+            gameListViewAdapter.notifyDataSetChanged();
+        }
+    }
+    //游戏频道ListView适配器
+    public class GameListViewAdapter extends BaseAdapter {
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView==null){
+                convertView=View.inflate(MainActivity.this,R.layout.list_item,null);
+                viewHolder=new ViewHolder();
+                viewHolder.titleText=(TextView)convertView.findViewById(R.id.title_text);
+                viewHolder.newsText=(TextView)convertView.findViewById(R.id.news_text);
+                viewHolder.timerText=(TextView)convertView.findViewById(R.id.timer_text);
+                convertView.setTag(viewHolder);
+            }else {
+                viewHolder=(ViewHolder)convertView.getTag();
+            }
+            gameData = (GameBean.ShowApi_Res_Body.PageBean.ContentList)getItem(position);
+            viewHolder.titleText.setText(gameData.getTitle());
+            viewHolder.newsText.setText(gameData.getSource());
+            viewHolder.timerText.setText(gameData.getPubDate());
+            return convertView;
+        }
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+        @Override
+        public Object getItem(int position) {
+            return gameDataList.get(position);
+        }
+        @Override
+        public int getCount() {
+            return gameDataList.size();
+        }
+
+    }
 
     //上拉加载更多回调
     @Override
     public void onLoadMore() {
-        getMoreFromSociety();
-        if (societyData !=null){
-            page++;
-        }else {
-            page=2;
-            Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+        switch (viewPager.getCurrentItem()){
+            case 0:
+                getMoreFromSociety();
+                if (societyData !=null){
+                    societyPage++;
+                }else {
+                    societyPage =2;
+                    Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case 1:
+                getMoreFromRecreation();
+                if (recreationData !=null){
+                    recreationPage++;
+                }else {
+                    recreationPage=2;
+                    Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case 2:
+                getMoreFromDigital();
+                if (digitalData!=null){
+                    digitalPage++;
+                }else{
+                    digitalPage=2;
+                    Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case 3:
+                getMoreFromInternet();
+                if (internetData!=null){
+                    internetPage++;
+                }else{
+                    internetPage=2;
+                    Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case 4:
+                getMoreFromMovie();
+                if (movieData!=null){
+                    moviePage++;
+                }else{
+                    moviePage=2;
+                    Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case 5:
+                getMoreFromGame();
+                if (gameData!=null){
+                    gamePage++;
+                }else{
+                    gamePage=2;
+                    Toast.makeText(MainActivity.this,"没有更多新闻",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                break;
         }
+
 
     }
     //下拉刷新回调
     @Override
     public void onRefresh() {
-        getDataFromSociety();
-        societySwiRefresh.setRefreshing(false);
+        switch (viewPager.getCurrentItem()){
+            case 0:
+                getDataFromSociety();
+                societySwiRefresh.setRefreshing(false);
+                break;
+            case 1:
+                getDataFromRecreation();
+                recreationSwiRefresh.setRefreshing(false);
+                break;
+            case 2:
+                getDataFromDigital();
+                digitalSwiRefresh.setRefreshing(false);
+                break;
+            case 3:
+                getDataFromInternet();
+                internetSwiRefresh.setRefreshing(false);
+                break;
+            case 4:
+                getDataFromMovie();
+                movieSwiRefresh.setRefreshing(false);
+                break;
+            case 5:
+                getDataFromGame();
+                gameSwiRefresh.setRefreshing(false);
+                break;
+            default:
+                break;
+        }
+
     }
     //ListView点击事件回调
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent=new Intent(MainActivity.this,NewsActivity.class);;
+        Intent intent=new Intent(MainActivity.this,NewsActivity.class);
         switch (parent.getId()){
             case R.id.home_list:
                 intent.putExtra("url", societyDataList.get(position).getLink());
@@ -482,6 +933,22 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
                 break;
             case R.id.home2_list:
                 intent.putExtra("url", recreationDataList.get(position).getLink());
+                startActivity(intent);
+                break;
+            case R.id.home3_list:
+                intent.putExtra("url",digitalDataList.get(position).getLink());
+                startActivity(intent);
+                break;
+            case R.id.home4_list:
+                intent.putExtra("url",internetDataList.get(position).getLink());
+                startActivity(intent);
+                break;
+            case R.id.home5_list:
+                intent.putExtra("url",movieDataList.get(position).getLink());
+                startActivity(intent);
+                break;
+            case R.id.home6_list:
+                intent.putExtra("url",gameDataList.get(position).getLink());
                 startActivity(intent);
                 break;
             default:
@@ -502,31 +969,63 @@ public class MainActivity extends Activity implements MyListView.OnRefreshListen
     public void onPageSelected(int position) {
         switch (position){
             case 0:
+                getDataFromSociety();
+                final String cache=CacheUtils.getCache(MainActivity.this,URList.URL+URList.SOCIETY_ID+URList.PARAMETER_URL+URList.PAGE);
+                if (!TextUtils.isEmpty(cache)){
+                    processDataSociety(cache,false);
+                }
                 break;
             case 1:
                 getDataFromRecreation();
                 final String cache1=CacheUtils.getCache(MainActivity.this,URList.URL+URList.RECREATION_ID+URList.PARAMETER_URL+URList.PAGE );
                 if (!TextUtils.isEmpty(cache1)){
-                    Log.d("TAG","发现缓存，准备解析缓存中的Json数据");
                     processDataRecreation(cache1,false);
                 }
                 break;
             case 2:
-                Log.d("TAG","现在是数码频道");
+                getDataFromDigital();
+                final String cache2=CacheUtils.getCache(MainActivity.this,URList.URL+URList.DIGITAL_ID+URList.PARAMETER_URL+URList.PAGE);
+                if (!TextUtils.isEmpty(cache2)){
+                    processDataDigital(cache2,false);
+                }
                 break;
             case 3:
-                Log.d("TAG","现在是互联网频道");
+                getDataFromInternet();
+                final String cache3=CacheUtils.getCache(MainActivity.this,URList.URL+URList.INTERNET_ID+URList.PARAMETER_URL+URList.PAGE);
+                if (!TextUtils.isEmpty(cache3)){
+                    processDataInternet(cache3,false);
+                }
                 break;
             case 4:
-                Log.d("TAG","现在是电影频道");
+                getDataFromMovie();
+                final String cache4=CacheUtils.getCache(MainActivity.this,URList.URL+URList.MOVIE_ID+URList.PARAMETER_URL+URList.PAGE);
+                if (!TextUtils.isEmpty(cache4)){
+                    processDataMovie(cache4,false);
+                }
                 break;
             case 5:
-                Log.d("TAG","现在是游戏频道");
+                getDataFromGame();
+                final String cache5=CacheUtils.getCache(MainActivity.this,URList.URL+URList.GEME_ID+URList.PARAMETER_URL+URList.PAGE);
+                if (!TextUtils.isEmpty(cache5)){
+                    processDataGame(cache5,false);
+                }
                 break;
             default:
                 break;
         }
     }
 
-
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.bar_img:
+                mDrawerLayout.openDrawer(leftLayout);
+                break;
+            case R.id.about_layout:
+                startActivity(new Intent(MainActivity.this,AboutActivity.class));
+                break;
+            default:
+                break;
+        }
+    }
 }
